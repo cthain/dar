@@ -12,7 +12,7 @@ import (
 	"os"
 	"syscall"
 
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 const (
@@ -91,16 +91,16 @@ var (
 )
 
 func main() {
-	flag.StringVar(&inFile, "in", "-", "The target input file. By default input is read from stdin.")
-	flag.StringVar(&inFile, "i", "-", "Alias for in.")
-	flag.StringVar(&outFile, "out", "-", "The target output file. By default output goes to stdout.")
-	flag.StringVar(&outFile, "o", "-", "Alias for out.")
-	flag.StringVar(&key, "key", "", "The encryption/decryption key")
-	flag.StringVar(&key, "k", "", "Alias for key")
-	flag.BoolVar(&decryptMode, "d", false, "Decryption mode. Input data will be decrypted")
-	flag.BoolVar(&decryptMode, "decrypt", false, "Decryption mode. Input data will be decrypted")
-	flag.BoolVar(&encryptMode, "e", false, "Encryption mode. Input data will be encrypted")
-	flag.BoolVar(&encryptMode, "encrypt", false, "Encryption mode. Input data will be encrypted")
+	flag.StringVar(&inFile, "in", "", "The target input file. By default input is read from stdin. Note that if you don't provide a -in argument, you must provide the -key argument.")
+	flag.StringVar(&inFile, "i", "", "Alias for in.")
+	flag.StringVar(&outFile, "out", "", "The target output file. By default output goes to stdout.")
+	flag.StringVar(&outFile, "o", "", "Alias for out.")
+	flag.StringVar(&key, "key", "", "The encryption/decryption key. If not provided, you will be prompted for a key.")
+	flag.StringVar(&key, "k", "", "Alias for key.")
+	flag.BoolVar(&decryptMode, "d", false, "Alias for decrypt.")
+	flag.BoolVar(&decryptMode, "decrypt", false, "Decryption mode. Input data will be decrypted.")
+	flag.BoolVar(&encryptMode, "e", false, "Alias for encrypt.")
+	flag.BoolVar(&encryptMode, "encrypt", false, "Encryption mode. Input data will be encrypted.")
 	flag.Parse()
 
 	var fn func([]byte, []byte) ([]byte, error)
@@ -117,7 +117,7 @@ func main() {
 
 	for key == "" {
 		fmt.Fprintf(os.Stderr, "Enter pass key to %s: ", mode)
-		if b, err := terminal.ReadPassword(int(syscall.Stdin)); err == nil {
+		if b, err := term.ReadPassword(int(syscall.Stdin)); err == nil {
 			key = string(b)
 			fmt.Fprintln(os.Stderr, "")
 		} else {
@@ -135,7 +135,7 @@ func main() {
 func readData(f string) []byte {
 	var r io.Reader
 	switch f {
-	case "-":
+	case "":
 		r = os.Stdin
 	default:
 		file, err := os.Open(f)
@@ -155,7 +155,7 @@ func readData(f string) []byte {
 
 func writeData(f string, d []byte) {
 	switch outFile {
-	case "-":
+	case "":
 		fmt.Print(string(d))
 	default:
 		if err := os.WriteFile(f, d, 0600); err != nil {

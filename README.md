@@ -5,7 +5,7 @@ This is a small program that allows you to store data at rest in an encrypted fo
 ## Install
 
 ```sh
-go install github.com/cthain/dar
+go install github.com/cthain/dar@latest
 ```
 
 ## Usage
@@ -46,6 +46,6 @@ wrote encrypted data to encrypted.dar
 
 # decrypt the encrypted file data
 $ dar -d -in encrypted.dar
-Enter pass key to encrypt: 
+Enter pass key to decrypt: 
 this is plaintext
 ```
